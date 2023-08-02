@@ -142,6 +142,7 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
             prev_score1 = cur_score1
             if is_swap(score1, score0): score0, score1 = score1, score0
 
+        say = say(score0, score1)
         who = other(who)
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
@@ -157,10 +158,20 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     21 # When num is 1, sum = 1
     >>> s1
     6
+    >>> from hog import play, always_roll
+    >>> from dice import make_test_dice
+    >>> #
+    >>> # Ensure that say is properly updated within the body of play.
+    >>> def total(s0, s1):
+    ...     print(s0 + s1)
+    ...     return echo
+    >>> def echo(s0, s1):
+    ...     print(s0, s1)
+    ...     return total
+    >>> s0, s1 = play(always_roll(1), always_roll(1), dice=make_test_dice(2, 3), goal=15, say=echo)
     """
     # BEGIN PROBLEM 6
     "*** YOUR CODE HERE ***"
-
     # END PROBLEM 6
     return score0, score1
 
@@ -247,7 +258,22 @@ def announce_highest(who, last_score=0, running_high=0):
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    def say(score0, score1): # def say(*scores):...also OK
+        high = running_high
+        if who == 0:
+            gain = score0 - last_score
+            if gain > running_high:
+                high = gain
+                print(f"{high} point(s)! That's the biggest gain yet for Player 0")
+            return announce_highest(who, score0, high)
+        else:
+            gain = score1 - last_score
+            if gain > running_high:
+                high = gain
+                print(f"{high} point(s)! That's the biggest gain yet for Player 1")
+            return announce_highest(who, score1, high)
     
+    return say
     # END PROBLEM 7
 
 
@@ -265,7 +291,7 @@ def always_roll(n):
 
     >>> strategy = always_roll(5)
     >>> strategy(0, 0)
-    5
+    5                   
     >>> strategy(99, 99)
     5
     """
