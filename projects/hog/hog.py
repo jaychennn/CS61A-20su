@@ -310,9 +310,24 @@ def make_averaged(original_function, trials_count=1000):
     >>> averaged_dice = make_averaged(dice, 1000)
     >>> averaged_dice()
     3.0
+
+    >>> dice = make_test_dice(3, 1, 5, 6)
+    >>> averaged_roll_dice = make_averaged(roll_dice, 1000)
+    >>> # Average of calling roll_dice 1000 times
+    >>> # Enter a float (e.g. 1.0) instead of an integer
+    >>> averaged_roll_dice(2, dice)
+    6.0
     """
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    def func(*args):
+        cnt = trials_count
+        sum = 0
+        while cnt > 0:
+            sum += original_function(*args)
+            cnt -= 1
+        return sum/trials_count
+    return func
     # END PROBLEM 8
 
 
@@ -327,6 +342,22 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    rolls = 1
+    trials = []
+    # max_scoring_rolls = 1
+    while rolls < 11:
+        average_roll_dice = make_averaged(roll_dice, trials_count)
+        ret = average_roll_dice(rolls, dice)
+        trials.append(ret)
+        # if ret > average_roll_dice(max_scoring_rolls, dice):
+        #     max_scoring_rolls = rolls
+        '''The error I made before is calling the average_roll_dice function 2 times'''
+        rolls += 1 
+    
+    return trials.index(max(trials))+1
+    # ma = make_averaged(roll_dice, trials_count)
+    # trials = [ma(i, dice) for i in range(1, 11)]
+    # return trials.index(max(trials)) + 1
     # END PROBLEM 9
 
 
@@ -364,7 +395,7 @@ def run_experiments():
     if False:  # Change to True to test swap_strategy
         print('swap_strategy win rate:', average_win_rate(swap_strategy))
 
-    if False:  # Change to True to test final_strategy
+    if True:  # Change to True to test final_strategy
         print('final_strategy win rate:', average_win_rate(final_strategy))
 
     "*** You may add additional experiments as you wish ***"
@@ -376,7 +407,10 @@ def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     rolls NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 6  # Replace this statement
+    if free_bacon(opponent_score) >= cutoff:
+        return 0
+    else:
+        return num_rolls
     # END PROBLEM 10
 
 
@@ -386,17 +420,45 @@ def swap_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     non-beneficial swap. Otherwise, it rolls NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 6  # Replace this statement
+    if is_swap(score + free_bacon(opponent_score), opponent_score):
+        if opponent_score > score + free_bacon(opponent_score):
+            return 0
+        elif opponent_score < score + free_bacon(opponent_score): 
+            return num_rolls
+        else: 
+            if free_bacon(opponent_score) >= cutoff: return 0
+            else: return num_rolls
+    elif free_bacon(opponent_score) >= cutoff:
+        return 0
+    else: return num_rolls
     # END PROBLEM 11
 
 
-def final_strategy(score, opponent_score):
+def final_strategy(score, opponent_score, cutoff = 5, num_rolls = 4):
     """Write a brief description of your final strategy.
 
     *** YOUR DESCRIPTION HERE ***
+    First we use the swap_strategy, which has win rate of about 0.7
+    then consider the leading situation, we may take fewer risks to avoid
+    rolling 1 point, thus we choose to roll 2 dices
+    When under adverse situation, which means the gap between the player 
+    and opponent is bigger than 5 points, we choose to roll more dices to 
+    get the chance of gaining larger scores.
     """
     # BEGIN PROBLEM 12
-    return 6  # Replace this statement
+    # if abs(opponent_score - score) >= 5: num_rolls = 4
+    # else: num_rolls = 3
+    if is_swap(score + free_bacon(opponent_score), opponent_score):
+        if opponent_score > score + free_bacon(opponent_score):
+            return 0
+        elif opponent_score < score + free_bacon(opponent_score): 
+            return num_rolls
+        else: 
+            if free_bacon(opponent_score) >= cutoff: return 0
+            else: return num_rolls
+    elif free_bacon(opponent_score) >= cutoff:
+        return 0
+    else: return num_rolls
     # END PROBLEM 12
 
 ##########################
