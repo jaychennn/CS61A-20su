@@ -55,7 +55,9 @@ def lambda_curry2(f):
 """The significance is change a single-argument function to a multiple-argument function, with the nested function to handle the rest arguments"""
 
 # import from lab02
+
 """Impressive usage of currying function"""
+
 def count_cond(condition):
     """Returns a function with one parameter N that counts all the numbers from
     1 to N that satisfy the two-argument predicate function Condition, where
@@ -90,3 +92,36 @@ def count_cond(condition):
             if condition(n, i): cnt += 1
         return cnt
     return func
+
+"""??? Confused function"""
+def flip(flop):
+    if flop>2:
+        return None
+    flip = lambda flip:3
+    return flip
+
+def flop(flip):
+    return flop
+
+flip, flop = flop, flip
+
+flip(flop(1)(2))(3)
+
+"""Decorator: track the footprint of the function"""
+
+def trace(fn):
+    def traced(x):
+        print("Calling the function", fn, "with the argument", x)
+        return fn(x)
+    return traced
+
+@trace
+def square(x):
+    return x * x
+"""Every time we call the function square, return a message 'Calling...'"""
+def sum_squared_up_to(n):
+    k = 1
+    total = 0
+    while k <= n:
+        total, k = total + square(k), k+1
+    return total
