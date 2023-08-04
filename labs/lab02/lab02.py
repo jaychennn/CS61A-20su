@@ -15,8 +15,11 @@ def lambda_curry2(func):
     3
     """
     "*** YOUR CODE HERE ***"
-    return ______
+    # def g(x):
+    #     return lambda y: func(x,y)
+    return lambda x: lambda y: func(x,y)
 
+    
 
 
 def count_cond(condition):
@@ -47,11 +50,18 @@ def count_cond(condition):
     8
     """
     "*** YOUR CODE HERE ***"
-
+    def func(n):
+        cnt = 0
+        for i in range(1, n+1):
+            if condition(n, i): cnt += 1
+        return cnt
+    return func
 
 
 def both_paths(sofar="S"):
     """
+    Your task is to implement the function both_paths, which prints out the path so far (at first just S), and then returns two functions, each of which keeps track of a branch down or up.
+
     >>> up, down = both_paths()
     S
     >>> upup, updown = up()
@@ -62,6 +72,13 @@ def both_paths(sofar="S"):
     SUU
     """
     "*** YOUR CODE HERE ***"
+    # Great idea!
+    print(sofar)
+    def up_path():
+        return both_paths(sofar + "U")
+    def down_path():
+        return both_paths(sofar + "D")
+    return up_path, down_path
 
 
 
@@ -97,11 +114,19 @@ def composite_identity(f, g):
     False
     """
     "*** YOUR CODE HERE ***"
+    def judge(x):
+        if compose1(f, g)(x) != compose1(g, f)(x):
+            return False
+        else: return True
+    return judge
+
 
 
 
 def cycle(f1, f2, f3):
     """Returns a function that is itself a higher-order function.
+
+    Define a function cycle that takes in three functions f1, f2, f3, as arguments. cycle will return another function that should take in an integer argument n and return another function. That final function should take in an argument x and cycle through applying f1, f2, and f3 to x, depending on what n was. 
 
     >>> def add1(x):
     ...     return x + 1
@@ -127,4 +152,14 @@ def cycle(f1, f2, f3):
     19
     """
     "*** YOUR CODE HERE ***"
-
+    def func1(n):
+        def func2(x):
+            whole_cycles_num = n // 3
+            rest = n % 3
+            for cnt in range(whole_cycles_num):
+                x = f3(f2(f1(x)))
+            if rest == 0: return x
+            if rest == 1: return f1(x)
+            if rest == 2: return f2(f1(x))
+        return func2
+    return func1
