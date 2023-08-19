@@ -112,3 +112,16 @@ def repeated(f, n):
     else:
         return compose1(f, repeated(f, n - 1))
     #Don't change the f in the first slot, which is the function that compound g
+
+def sum_rec(List):
+    if List == []:
+        return 0
+    else:
+        return List[0] + sum_rec(List[1:])
+# Elegant
+def reverse_list(List):
+    if len(List) == 1:
+        return List
+    else:
+        return reverse_list(List[1:]) + [List[0]]
+    
