@@ -174,7 +174,22 @@ def report_progress(typed, prompt, id, send):
     """Send a report of your id and progress so far to the multiplayer server."""
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    i, index, flag = 0, 0, True
+    while i < min(len(typed), len(prompt)):
+        if typed[i] != prompt[i]:
+            flag, index = False, i
+            break
+        i += 1
+    if flag == True:
+        index = len(typed)
+    
+    percentage = index/len(prompt)
+    d = {'id': id, 'progress': percentage}
+    send(d)
+    return percentage
+    
     # END PROBLEM 8
+
 
 
 def fastest_words_report(times_per_player, words):
@@ -200,6 +215,16 @@ def time_per_word(times_per_player, words):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    
+    for time in times_per_player:
+        i = 0
+        while i < len(time) - 1:
+            time[i] = time[i + 1] - time[i]
+            i += 1
+        time.pop() # Delete the last member
+        # Or: del(time[-1])
+    return game(words, times_per_player)
+
     # END PROBLEM 9
 
 
@@ -215,6 +240,19 @@ def fastest_words(game):
     words = range(len(all_words(game)))    # An index for each word
     # BEGIN PROBLEM 10
     "*** YOUR CODE HERE ***"
+    fastest = [[] for i in players]
+    # fastest = []
+    # for i in players:
+    #     fastest.append([])
+    for i in words:
+        min_time_player = 0
+
+        for j in players:
+            if time(game, j, i) < time(game, min_time_player, i):
+                min_time_player = j
+        fastest[min_time_player] += [word_at(game, i)]
+
+    return fastest
     # END PROBLEM 10
 
 
@@ -254,7 +292,7 @@ def game_string(game):
     """A helper function that takes in a game object and returns a string representation of it"""
     return "game(%s, %s)" % (game[0], game[1])
 
-enable_multiplayer = False  # Change to True when you
+enable_multiplayer = True  # Change to True when you
 
 ##########################
 # Extra Credit #
@@ -262,14 +300,31 @@ enable_multiplayer = False  # Change to True when you
 
 key_distance = get_key_distances()
 def key_distance_diff(start, goal, limit):
-    """ A diff function that takes into account the distances between keys when
-    computing the difference score."""
+    """ 
+    A diff function that takes into account the distances between keys when
+    computing the difference score.
+    Your task is to implement the function key_distance_diff. This is a diff function that, for every substitute operation where an existing letter is substituted with another letter, takes into account how far the letter being substituted in is from the letter being replaced. 
+    For example, substituting "q" with "t" increases the difference measurement by twice as much as "q" and "e" because "q" and "t" are 4 keys apart, while "q" and "e" are 2 keys apart. 
+    In the event where more than LIMIT number of changes need to be made, return the difference as infinite. Note that in python this can be done with float("inf").
+    """
 
     start = start.lower() #converts the string to lowercase
     goal = goal.lower() #converts the string to lowercase
 
-    # BEGIN PROBLEM EC1
+     # BEGIN PROBLEM EC1
     "*** YOUR CODE HERE ***"
+    if limit < 0:
+        return float('inf')
+    if len(start) == 0 or len(goal) == 0:
+        return len(start) + len(goal)
+    elif start[0] == goal[0]:
+        return key_distance_diff(start[1:], goal[1:], limit)
+    else:
+        add_diff = 1 + key_distance_diff(start, goal[1:], limit - 1)
+        remove_diff = 1 + key_distance_diff(start[1:], goal, limit - 1) 
+        kd = key_distance[(start[0], goal[0])]
+        substitute_diff = kd + key_distance_diff(start[1:], goal[1:], limit - 1) 
+        return min(add_diff, remove_diff, substitute_diff)
     # END PROBLEM EC1
 
 def memo(f):
@@ -282,7 +337,9 @@ def memo(f):
         return cache[args]
     return memoized
 
+key_distance_diff = memo(key_distance_diff)
 key_distance_diff = count(key_distance_diff)
+memo_for_fa = {}
 
 
 def faster_autocorrect(user_word, valid_words, diff_function, limit):
@@ -290,6 +347,24 @@ def faster_autocorrect(user_word, valid_words, diff_function, limit):
 
     # BEGIN PROBLEM EC2
     "*** YOUR CODE HERE ***"
+    idx = tuple([user_word, tuple(valid_words), diff_function, limit])
+    if user_word in valid_words:
+        return user_word
+    if idx in memo_for_fa:
+        return memo_for_fa[idx]
+    else:
+        # print("DEBUG: will is in the valid_words", "will" in valid_words)
+        # print("DEBUG: dist(woll, will) = ", diff_function(user_word, "will", limit))
+        # print("DEBUG: dist(woll, well) = ", diff_function(user_word, "well", limit))
+        words_diff = [diff_function(user_word, w, limit) for w in valid_words]
+        similar_word, similar_diff = min(zip(valid_words, words_diff), key=lambda item: item[1])
+        print("DEBUG:", similar_word)
+        if similar_diff > limit:
+            ret = user_word
+        else:
+            ret = similar_word
+        memo_for_fa[idx] = ret
+        return ret
     # END PROBLEM EC2
 
 
