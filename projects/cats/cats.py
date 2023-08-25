@@ -99,17 +99,18 @@ def autocorrect(user_word, valid_words, diff_function, limit):
     else:
         # Initialization
         min_diff = diff_function(user_word, valid_words[0], limit)
-        min_diff_word = valid_words[0]
+        min_diff_index = 0
         # Find the min
-        for valid_word in valid_words:
-            if diff_function(user_word, valid_word, limit) < min_diff:
-                min_diff_word = valid_word
-                min_diff = diff_function(user_word, valid_word, limit)
+        for index in range(1, len(valid_words)):
+            diff = diff_function(user_word, valid_words[index], limit)
+            if diff < min_diff:
+                min_diff_index = index
+                min_diff = diff
 
         if min_diff > limit:
             return user_word
         else:
-            return min_diff_word
+            return valid_words[min_diff_index]
 
     # END PROBLEM 5
 
@@ -347,24 +348,40 @@ def faster_autocorrect(user_word, valid_words, diff_function, limit):
 
     # BEGIN PROBLEM EC2
     "*** YOUR CODE HERE ***"
-    idx = tuple([user_word, tuple(valid_words), diff_function, limit])
+    key = tuple([user_word, tuple(valid_words), diff_function, limit])
     if user_word in valid_words:
         return user_word
-    if idx in memo_for_fa:
-        return memo_for_fa[idx]
+    if key in memo_for_fa:
+        return memo_for_fa[key]
     else:
+        # Initialization
+        min_diff = diff_function(user_word, valid_words[0], limit)
+        min_diff_index = 0
+        # Find the min
+        for index in range(1, len(valid_words)):
+            diff = diff_function(user_word, valid_words[index], limit)
+            if diff < min_diff:
+                min_diff_index = index
+                min_diff = diff
+
+        if min_diff > limit:
+            ret = user_word
+        else:
+            ret = valid_words[min_diff_index]
+        memo_for_fa[key] = ret
+        return ret
         # print("DEBUG: will is in the valid_words", "will" in valid_words)
         # print("DEBUG: dist(woll, will) = ", diff_function(user_word, "will", limit))
         # print("DEBUG: dist(woll, well) = ", diff_function(user_word, "well", limit))
-        words_diff = [diff_function(user_word, w, limit) for w in valid_words]
-        similar_word, similar_diff = min(zip(valid_words, words_diff), key=lambda item: item[1])
-        print("DEBUG:", similar_word)
-        if similar_diff > limit:
-            ret = user_word
-        else:
-            ret = similar_word
-        memo_for_fa[idx] = ret
-        return ret
+        # words_diff = [diff_function(user_word, w, limit) for w in valid_words]
+        # similar_word, similar_diff = min(zip(valid_words, words_diff), key=lambda item: item[1])
+        # print("DEBUG:", similar_word)
+        # if similar_diff > limit:
+        #     ret = user_word
+        # else:
+        #     ret = similar_word
+        # memo_for_fa[idx] = ret
+        # return ret
     # END PROBLEM EC2
 
 
