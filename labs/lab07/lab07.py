@@ -215,6 +215,7 @@ def make_advanced_counter_maker():
     >>> tom_counter('global-count')
     1
     """
+    
     sum_global = 0
     def make_counter():
         sum_count = 0
